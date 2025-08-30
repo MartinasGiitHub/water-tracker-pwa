@@ -1,2 +1,2 @@
 # water-tracker-pwa
-Trinkmengen Zähler. Trinkmenge 1800ml
+Trinkmengen Zähler. Trinkmenge ins. 1800ml
