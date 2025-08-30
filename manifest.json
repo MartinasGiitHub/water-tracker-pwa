@@ -1,0 +1,64 @@
+{
+  "name": "Wasser Tracker - Dein persönlicher Hydration Coach",
+  "short_name": "Wasser Tracker",
+  "description": "Verfolge dein tägliches Trinkziel von 1800ml mit stündlichen Erinnerungen und motivierenden Statistiken.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#667eea",
+  "theme_color": "#2196F3",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "de-DE",
+  "categories": ["health", "lifestyle", "productivity"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23667eea;stop-opacity:1' /><stop offset='100%' style='stop-color:%23764ba2;stop-opacity:1' /></linearGradient></defs><circle cx='96' cy='96' r='88' fill='url(%23grad)'/><text x='96' y='130' text-anchor='middle' fill='white' font-size='80' font-family='Arial'>💧</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23667eea;stop-opacity:1' /><stop offset='100%' style='stop-color:%23764ba2;stop-opacity:1' /></linearGradient></defs><circle cx='256' cy='256' r='240' fill='url(%23grad)'/><text x='256' y='340' text-anchor='middle' fill='white' font-size='200' font-family='Arial'>💧</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Schnell 250ml hinzufügen",
+      "short_name": "250ml",
+      "description": "Füge schnell ein Glas Wasser hinzu",
+      "url": "/?action=add250",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><circle cx='48' cy='48' r='40' fill='%232196F3'/><text x='48' y='60' text-anchor='middle' fill='white' font-size='40'>🥤</text></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Statistiken anzeigen",
+      "short_name": "Stats",
+      "description": "Zeige deine Trink-Statistiken",
+      "url": "/?view=stats",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><circle cx='48' cy='48' r='40' fill='%234CAF50'/><text x='48' y='60' text-anchor='middle' fill='white' font-size='30'>📊</text></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 390 844'><rect width='390' height='844' fill='%23667eea'/><rect x='20' y='100' width='350' height='200' fill='white' opacity='0.1' rx='20'/><text x='195' y='80' text-anchor='middle' fill='white' font-size='30' font-weight='bold'>💧 Wasser Tracker</text><circle cx='195' cy='200' r='80' fill='none' stroke='white' stroke-width='8' opacity='0.3'/><text x='195' y='210' text-anchor='middle' fill='white' font-size='40' font-weight='bold'>1200</text><text x='195' y='240' text-anchor='middle' fill='white' font-size='16' opacity='0.8'>/ 1800 ml</text></svg>",
+      "sizes": "390x844",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "dir": "ltr"
+}
