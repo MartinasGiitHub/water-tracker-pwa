@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2196F3">
+    <title>💧 Wasser Tracker</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- iOS PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Wasser Tracker">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%232196F3'/><text x='50' y='60' text-anchor='middle' fill='white' font-size='40'>💧</text></svg>">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .date {
+            opacity: 0.8;
+            font-size: 1.1rem;
+        }
+
+        .progress-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .progress-circle {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-background {
+            stroke: rgba(255, 255, 255, 0.2);
+            stroke-width: 8;
+            fill: none;
+        }
+
+        .progress-ring-fill {
+            stroke: #4CAF50;
+            stroke-width: 8;
+            fill: none;
+            stroke-linecap: round;
+            transition: stroke-dasharray 0.5s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .current-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .target-amount {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .water-btn, .stats-btn {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .water-btn:hover, .stats-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .stats-btn {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .stats-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .water-btn .icon, .stats-btn .icon {
+            font-size: 1.8rem;
+        }
+
+        .notifications-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .notification-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #4CAF50;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(30px);
+        }
+
+        .trophy-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5rem;
+            z-index: 1000;
+            animation: trophyBounce 2s ease-out;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        @keyframes trophyBounce {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .reset-btn {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 15px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-header h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stats-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .stats-section h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .month-calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-top: 15px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .calendar-day.success {
+            background: #4CAF50;
+        }
+
+        .calendar-day.partial {
+            background: #FF9800;
+        }
+
+        .calendar-day.failed {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .calendar-day.today {
+            border: 2px solid white;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .progress-circle {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .current-amount {
+                font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 20px;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💧 Wasser Tracker</h1>
+            <div class="date" id="currentDate"></div>
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-circle">
+                <svg class="progress-ring" width="200" height="200">
+                    <circle class="progress-ring-background" cx="100" cy="100" r="90"/>
+                    <circle class="progress-ring-fill" cx="100" cy="100" r="90" id="progressCircle"/>
+                </svg>
+                <div class="progress-text">
+                    <div class="current-amount" id="currentAmount">0</div>
+                    <div class="target-amount">/ 1800 ml</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="water-btn" onclick="addWater(350)">
+                <span class="icon">💧</span>
+                <span>350ml Wasser</span>
+            </button>
+            <button class="water-btn" onclick="addWater(250)">
+                <span class="icon">🥤</span>
+                <span>250ml Softdrink</span>
+            </button>
+            <button class="water-btn" onclick="addWater(250)">
+                <span class="icon">☕</span>
+                <span>250ml Kaffee</span>
+            </button>
+            <button class="stats-btn" onclick="showMonthlyStats()">
+                <span class="icon">📊</span>
+                <span>Statistiken</span>
+            </button>
+        </div>
+
+        <div class="notifications-section">
+            <div class="notification-toggle">
+                <span>🔔 Stündliche Erinnerungen</span>
+                <div class="toggle-switch" id="notificationToggle" onclick="toggleNotifications()">
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+            <div id="notificationStatus" style="font-size: 0.9rem; opacity: 0.8;">
+                Tippe um Benachrichtigungen zu aktivieren
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="todayGlasses">0</div>
+                <div class="stat-label">Gläser heute</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="weekStreak">0</div>
+                <div class="stat-label">Tage-Serie</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalWeek">0L</div>
+                <div class="stat-label">Dieser Monat</div>
+            </div>
+        </div>
+
+        <button class="reset-btn" onclick="resetDay()">
+            🔄 Tag zurücksetzen
+        </button>
+    </div>
+
+    <!-- Modal für Monatsstatistiken -->
+    <div class="modal" id="statsModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <div class="modal-header">
+                <h2>📊 Monatsstatistiken</h2>
+                <div id="currentMonth"></div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stats-section">
+                    <h3>Monats-Übersicht</h3>
+                    <div class="stat-card">
+                        <div class="stat-value" id="monthTotal">0L</div>
+                        <div class="stat-label">Gesamtmenge</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="monthAverage">0ml</div>
+                        <div class="stat-label">Ø pro Tag</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="successDays">0</div>
+                        <div class="stat-label">Erfolgreiche Tage</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="monthProgress">0%</div>
+                        <div class="stat-label">Ziel erreicht</div>
+                    </div>
+                </div>
+
+                <div class="stats-section">
+                    <h3>Monatskalender</h3>
+                    <div class="month-calendar" id="monthCalendar"></div>
+                    <div style="margin-top: 15px; font-size: 0.8rem; text-align: center;">
+                        <div>🟢 Ziel erreicht (≥1800ml)</div>
+                        <div>🟠 Teilweise (≥900ml)</div>
+                        <div>⚫ Unter 900ml</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="trophy-animation" id="trophyAnimation">🏆</div>
+
+    <script>
+        // App-Zustand
+        let waterData = {
+            today: 0,
+            target: 1800,
+            lastDate: new Date().toDateString(),
+            weekData: [],
+            monthData: {},
+            streak: 0,
+            notificationsEnabled: false
+        };
+
+        // Lokale Speicherung
+        function saveData() {
+            localStorage.setItem('waterTracker', JSON.stringify(waterData));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('waterTracker');
+            if (saved) {
+                waterData = { ...waterData, ...JSON.parse(saved) };
+                
+                // Neuer Tag? Reset!
+                const today = new Date().toDateString();
+                if (waterData.lastDate !== today) {
+                    // Gestrigen Wert in Monatsdaten speichern
+                    const yesterday = new Date(waterData.lastDate);
+                    const monthKey = `${yesterday.getFullYear()}-${yesterday.getMonth()}`;
+                    const dayKey = yesterday.getDate();
+                    
+                    if (!waterData.monthData[monthKey]) {
+                        waterData.monthData[monthKey] = {};
+                    }
+                    waterData.monthData[monthKey][dayKey] = waterData.today;
+                    
+                    // Streak berechnen
+                    if (waterData.today >= waterData.target) {
+                        waterData.streak++;
+                    } else {
+                        waterData.streak = 0;
+                    }
+                    
+                    // Wochendaten aktualisieren
+                    waterData.weekData.push(waterData.today);
+                    if (waterData.weekData.length > 7) {
+                        waterData.weekData.shift();
+                    }
+                    
+                    waterData.today = 0;
+                    waterData.lastDate = today;
+                    saveData();
+                }
+            }
+        }
+
+        // UI Updates
+        function updateDisplay() {
+            document.getElementById('currentAmount').textContent = waterData.today;
+            
+            // Fortschrittsring
+            const progress = Math.min(waterData.today / waterData.target, 1);
+            const circumference = 2 * Math.PI * 90;
+            const progressCircle = document.getElementById('progressCircle');
+            progressCircle.style.strokeDasharray = circumference;
+            progressCircle.style.strokeDashoffset = circumference - (progress * circumference);
+            
+            // Farbe basierend auf Fortschritt
+            if (progress >= 1) {
+                progressCircle.style.stroke = '#4CAF50';
+            } else if (progress >= 0.7) {
+                progressCircle.style.stroke = '#FFC107';
+            } else {
+                progressCircle.style.stroke = '#2196F3';
+            }
+            
+            // Statistiken
+            document.getElementById('todayGlasses').textContent = Math.ceil(waterData.today / 250);
+            document.getElementById('weekStreak').textContent = waterData.streak;
+            
+            const weekTotal = waterData.weekData.reduce((sum, day) => sum + day, 0) + waterData.today;
+            document.getElementById('totalWeek').textContent = (weekTotal / 1000).toFixed(1);
+            
+            // Benachrichtigungsstatus
+            const toggle = document.getElementById('notificationToggle');
+            const status = document.getElementById('notificationStatus');
+            
+            if (waterData.notificationsEnabled) {
+                toggle.classList.add('active');
+                status.textContent = '✅ Erinnerungen sind aktiv';
+            } else {
+                toggle.classList.remove('active');
+                status.textContent = 'Tippe um Benachrichtigungen zu aktivieren';
+            }
+        }
+
+        // Wasser hinzufügen
+        function addWater(amount) {
+            const oldAmount = waterData.today;
+            waterData.today += amount;
+            
+            // Ziel erreicht? Pokal anzeigen!
+            if (oldAmount < waterData.target && waterData.today >= waterData.target) {
+                showTrophy();
+            }
+            
+            saveData();
+            updateDisplay();
+        }
+
+        // Pokal-Animation
+        function showTrophy() {
+            const trophy = document.getElementById('trophyAnimation');
+            trophy.style.opacity = '1';
+            trophy.style.animation = 'trophyBounce 2s ease-out';
+            
+            // Vibration (falls unterstützt)
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200]);
+            }
+            
+            setTimeout(() => {
+                trophy.style.opacity = '0';
+            }, 2000);
+        }
+
+        // Monatsstatistiken anzeigen
+        function showMonthlyStats() {
+            const modal = document.getElementById('statsModal');
+            const now = new Date();
+            const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
+            const monthData = waterData.monthData[monthKey] || {};
+            
+            // Aktuellen Monat anzeigen
+            document.getElementById('currentMonth').textContent = now.toLocaleDateString('de-DE', {
+                month: 'long',
+                year: 'numeric'
+            });
+            
+            // Monatsstatistiken berechnen
+            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            const today = now.getDate();
+            
+            let totalMonth = waterData.today; // Heutiger Wert
+            let successDays = waterData.today >= waterData.target ? 1 : 0;
+            
+            // Vergangene Tage des Monats
+            for (let day = 1; day < today; day++) {
+                const dayAmount = monthData[day] || 0;
+                totalMonth += dayAmount;
+                if (dayAmount >= waterData.target) {
+                    successDays++;
+                }
+            }
+            
+            const averagePerDay = Math.round(totalMonth / today);
+            const successPercentage = Math.round((successDays / today) * 100);
+            
+            // Werte anzeigen
+            document.getElementById('monthTotal').textContent = (totalMonth / 1000).toFixed(1) + 'L';
+            document.getElementById('monthAverage').textContent = averagePerDay + 'ml';
+            document.getElementById('successDays').textContent = successDays + '/' + today;
+            document.getElementById('monthProgress').textContent = successPercentage + '%';
+            
+            // Kalender erstellen
+            createMonthCalendar(monthData, now, daysInMonth);
+            
+            modal.classList.add('active');
+        }
+
+        // Monatskalender erstellen
+        function createMonthCalendar(monthData, currentDate, daysInMonth) {
+            const calendar = document.getElementById('monthCalendar');
+            calendar.innerHTML = '';
+            
+            const today = currentDate.getDate();
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.classList.add('calendar-day');
+                dayElement.textContent = day;
+                
+                let amount = 0;
+                if (day < today) {
+                    amount = monthData[day] || 0;
+                } else if (day === today) {
+                    amount = waterData.today;
+                }
+                
+                // Farbkodierung
+                if (day > today) {
+                    dayElement.style.background = 'rgba(255, 255, 255, 0.1)';
+                    dayElement.style.color = 'rgba(255, 255, 255, 0.5)';
+                } else if (amount >= waterData.target) {
+                    dayElement.classList.add('success');
+                } else if (amount >= waterData.target * 0.5) {
+                    dayElement.classList.add('partial');
+                } else {
+                    dayElement.classList.add('failed');
+                }
+                
+                if (day === today) {
+                    dayElement.classList.add('today');
+                }
+                
+                calendar.appendChild(dayElement);
+            }
+        }
+
+        // Modal schließen
+        function closeModal() {
+            document.getElementById('statsModal').classList.remove('active');
+        }
+
+        // Modal schließen bei Klick außerhalb
+        document.getElementById('statsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Tag zurücksetzen
+        function resetDay() {
+            if (confirm('Möchtest du wirklich den heutigen Fortschritt zurücksetzen?')) {
+                waterData.today = 0;
+                saveData();
+                updateDisplay();
+            }
+        }
+
+        // Benachrichtigungen
+        async function toggleNotifications() {
+            if (!waterData.notificationsEnabled) {
+                try {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        waterData.notificationsEnabled = true;
+                        scheduleNotifications();
+                        
+                        // Test-Benachrichtigung
+                        new Notification('🎉 Erinnerungen aktiviert!', {
+                            body: 'Du bekommst jetzt stündlich eine Trinkerinnerung.',
+                            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%232196F3"/><text x="50" y="60" text-anchor="middle" fill="white" font-size="40">💧</text></svg>'
+                        });
+                    }
+                } catch (error) {
+                    alert('Benachrichtigungen werden von deinem Browser nicht unterstützt.');
+                }
+            } else {
+                waterData.notificationsEnabled = false;
+                clearNotifications();
+            }
+            
+            saveData();
+            updateDisplay();
+        }
+
+        function scheduleNotifications() {
+            if ('serviceWorker' in navigator && waterData.notificationsEnabled) {
+                navigator.serviceWorker.register('sw.js');
+            }
+            
+            scheduleSimpleNotifications();
+        }
+
+        function scheduleSimpleNotifications() {
+            setInterval(() => {
+                if (waterData.notificationsEnabled && Notification.permission === 'granted') {
+                    const progress = Math.round((waterData.today / waterData.target) * 100);
+                    new Notification('💧 Zeit zu trinken!', {
+                        body: `Du hast heute ${waterData.today}ml getrunken (${progress}% deines Ziels).`,
+                        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%232196F3"/><text x="50" y="60" text-anchor="middle" fill="white" font-size="40">💧</text></svg>'
+                    });
+                }
+            }, 60 * 60 * 1000);
+        }
+
+        function clearNotifications() {
+            console.log('Benachrichtigungen deaktiviert');
+        }
+
+        // App-Initialisierung
+        function initApp() {
+            // Datum anzeigen
+            const today = new Date();
+            document.getElementById('currentDate').textContent = today.toLocaleDateString('de-DE', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            loadData();
+            updateDisplay();
+            
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js');
+            }
+        }
+
+        // App starten
+        initApp();
+    </script>
+</body>
+</html>
